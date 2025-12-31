@@ -1,31 +1,25 @@
-# OfflineU: Self-Hosted Local Course Loader & Progress Tracker
+# StudyingPortal: Self-Hosted Local Course Loader & Progress Tracker
 
-**OfflineU** is a sleek, self-hosted web app designed to load and view your offline video, audio, text, and quiz-based training courses. Whether it's Udemy downloads, "open sourced" training archives, or personal content, OfflineU turns your course folder into a fully navigable dashboard with automatic progress tracking.
-
----
-
-## ✨ Features
-
-* 📁 **Dynamic folder parsing**: Scans and maps your course structure into a browsable tree view.
-* 🎥 **Video & Audio player**: Integrated media player with resume & completion tracking.
-* 📄 **Text & HTML viewer**: Supports .txt, .md, .html, .pdf, and more.
-* ✅ **Lesson progress tracking**: Auto-saves your time spent and marks lessons as completed.
-* ♻️ **Continue where you left off**: Resume instantly from your last-accessed lesson.
-* 💾 **Local-first & private**: 100% offline. No cloud, no tracking, no nonsense.
-* 🧑‍💻 **Works with any course format**: No metadata required, just structured folders.
-* 🧠 **Ideal for hoarders, students, or offline learning setups**
+**StudyingPortal** is a sleek, self-hosted web app designed to load and view your offline video, audio, text, and quiz-based training courses. Whether it's Udemy downloads, "open sourced" training archives, or personal content, StudyingPortal turns your course folder into a fully navigable dashboard with automatic progress tracking.
 
 ---
 
-## 🗈️ Screenshots
+## Features
 
-> ![image](https://github.com/WhiskeyCoder/OfflineU/blob/main/images/lesson-0-8-2025-08-04-04_58_17.png)
+* Dynamic folder parsing: Scans and maps your course structure into a browsable tree view.
+* Video & Audio player: Integrated media player with resume & completion tracking.
+* Text & HTML viewer: Supports .txt, .md, .html, .pdf, and more.
+* Lesson progress tracking: Auto-saves your time spent and marks lessons as completed.
+* Continue where you left off: Resume instantly from your last-accessed lesson.
+* Local-first & private: 100% offline. No cloud, no tracking, no nonsense.
+* Works with any course format: No metadata required, just structured folders.
+* Ideal for hoarders, students, or offline learning setups
 
 ---
 
-## 🛠️ Installation
+## Installation
 
-### 🔁 Quick Start (Local)
+### Quick Start (Local)
 
 1. Clone the repo:
 
@@ -54,7 +48,7 @@
 
 ---
 
-## 📂 Folder Structure Example
+## Folder Structure Example
 
 ```bash
 MyCourse/
@@ -66,14 +60,14 @@ MyCourse/
 │   ├── 04 - Advanced Tips.mp4
 │   └── resources/
 │       └── extras.md
-└── .offlineu_progress.json  ← created automatically
+└── .studyingportal_progress.json  ← created automatically
 ```
 
-> 🌟 File types are detected automatically — videos, audio, quizzes, and docs.
+> File types are detected automatically — videos, audio, quizzes, and docs.
 
 ---
 
-## 📁 Supported File Types
+## Supported File Types
 
 | Type      | Extensions                                                  |
 | --------- | ----------------------------------------------------------- |
@@ -85,7 +79,7 @@ MyCourse/
 
 ---
 
-## ⚙️ CLI Options
+## CLI Options
 
 | Option               | Description                     |
 | -------------------- | ------------------------------- |
@@ -97,7 +91,7 @@ MyCourse/
 
 ---
 
-## 🧠 Roadmap
+## Roadmap
 
 * [x] Base function and testing
 * [ ] Multi-user profile support
@@ -109,7 +103,7 @@ MyCourse/
 
 ---
 
-## 💬 Community
+## Community
 
 Join the development, suggest features, or ask questions via:
 
@@ -117,13 +111,13 @@ Join the development, suggest features, or ask questions via:
 
 ---
 
-## 🛡️ License
+## License
 
 MIT License — Use freely, modify locally, share widely.
 
 ---
 
-## ✨ Author
+## Author
 
 Built with ❤️ by [@WhiskeyCoder](https://github.com/WhiskeyCoder)
 Inspired by the dream of **learning freely, offline, and without limits.**

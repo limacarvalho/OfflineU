@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OfflineU - Self-hosted Course Viewer & Tracker
+StudyingPortal - Self-hosted Course Viewer & Tracker
 Enhanced version with dynamic subdirectory navigation
 """
 
@@ -95,11 +95,11 @@ class DynamicCourseParser:
 
         # Build the directory tree
         root_node = DynamicCourseParser._build_directory_tree(course_path, course_path)
-        
+
         # Calculate completion statistics
         stats = DynamicCourseParser._calculate_completion_stats(root_node)
-        
-        progress_file = str(course_path / ".offlineu_progress.json")
+
+        progress_file = str(course_path / ".studyingportal_progress.json")
 
         return Course(
             name=course_name,
@@ -125,18 +125,18 @@ class DynamicCourseParser:
         try:
             # Get all items in current directory
             items = sorted(current_path.iterdir(), key=lambda x: (x.is_file(), x.name.lower()))
-            
+
             for item in items:
                 if item.name.startswith('.'):
                     continue
-                
+
                 if item.is_dir():
                     # Recursively process subdirectory
                     child_node = DynamicCourseParser._build_directory_tree(course_path, item, depth + 1)
                     if child_node.has_content or child_node.children:
                         node.children[child_node.name] = child_node
                         node.has_content = True
-                
+
                 elif item.is_file():
                     # Process file as potential lesson content
                     lesson = DynamicCourseParser._create_lesson_from_file(item, course_path)
@@ -215,24 +215,24 @@ class DynamicCourseParser:
         """Calculate completion statistics for a directory node"""
         total_lessons = 0
         completed_lessons = 0
-        
+
         def count_lessons_recursive(n: DirectoryNode):
             nonlocal total_lessons, completed_lessons
-            
+
             # Count lessons in this node
             for lesson in n.lessons:
                 total_lessons += 1
                 if lesson.completed:
                     completed_lessons += 1
-            
+
             # Recursively count in children
             for child in n.children.values():
                 count_lessons_recursive(child)
-        
+
         count_lessons_recursive(node)
-        
+
         completion_percentage = (completed_lessons / total_lessons * 100) if total_lessons > 0 else 0
-        
+
         return {
             'total_lessons': total_lessons,
             'completed_lessons': completed_lessons,
@@ -265,23 +265,23 @@ class ProgressTracker:
     def update_lesson_progress(course: Course, lesson_path: str, completed: bool = False, progress_seconds: int = 0):
         """Update progress for specific lesson by path"""
         progress = ProgressTracker.load_progress(course)
-        
+
         progress[lesson_path] = {
             'completed': completed,
             'progress_seconds': progress_seconds,
             'last_accessed': datetime.now().isoformat()
         }
-        
+
         # Update last accessed path
         progress['last_accessed_path'] = lesson_path
-        
+
         ProgressTracker.save_progress(course, progress)
 
     @staticmethod
     def apply_progress_to_tree(course: Course):
         """Apply saved progress to the course tree"""
         progress = ProgressTracker.load_progress(course)
-        
+
         def apply_to_node(node: DirectoryNode):
             # Apply progress to lessons in this node
             for lesson in node.lessons:
@@ -289,10 +289,10 @@ class ProgressTracker:
                 lesson_path = lesson_path.replace('\\', '/')
                 if lesson_path.startswith('/'):
                     lesson_path = lesson_path[1:]
-                
+
                 # Check both the base path and path with title
                 lesson_path_with_title = f"{lesson_path}/{lesson.title.replace(' ', '_')}"
-                
+
                 if lesson_path in progress:
                     lesson.completed = progress[lesson_path].get('completed', False)
                     lesson.last_accessed = progress[lesson_path].get('last_accessed')
@@ -301,11 +301,11 @@ class ProgressTracker:
                     lesson.completed = progress[lesson_path_with_title].get('completed', False)
                     lesson.last_accessed = progress[lesson_path_with_title].get('last_accessed')
                     lesson.progress_seconds = progress[lesson_path_with_title].get('progress_seconds', 0)
-            
+
             # Recursively apply to children
             for child in node.children.values():
                 apply_to_node(child)
-        
+
         apply_to_node(course.root_node)
         course.last_accessed_path = progress.get('last_accessed_path')
 
@@ -343,7 +343,7 @@ def index():
 def browse_directories():
     """Browse directories for course selection"""
     path = request.args.get('path', '')
-    
+
     try:
         # If no path specified, start with available drives on Windows
         if not path:
@@ -453,27 +453,27 @@ def view_lesson(lesson_path: str):
 
     # Find the lesson in the tree
     lesson = find_lesson_in_tree(current_course.root_node, lesson_path)
-    
+
     if not lesson:
         return redirect(url_for('index'))
 
     # Get all lessons for navigation
     all_lessons = get_all_lessons(current_course.root_node)
     current_index = -1
-    
+
     # Find current lesson index
     for i, (path, lesson_obj) in enumerate(all_lessons):
         if lesson_obj == lesson:
             current_index = i
             break
-    
+
     # Get next and previous lessons
     prev_lesson = None
     next_lesson = None
-    
+
     if current_index > 0:
         prev_lesson = all_lessons[current_index - 1][0]
-    
+
     if current_index < len(all_lessons) - 1:
         next_lesson = all_lessons[current_index + 1][0]
 
@@ -495,7 +495,7 @@ def get_lesson_url(lesson: Lesson, course_path: str) -> str:
     lesson_file_path = lesson_file_path.replace('\\', '/')
     if lesson_file_path.startswith('/'):
         lesson_file_path = lesson_file_path[1:]
-    
+
     # Append lesson title for uniqueness
     lesson_url = f"{lesson_file_path}/{lesson.title.replace(' ', '_')}"
     return lesson_url
@@ -506,44 +506,44 @@ def find_lesson_in_tree(node: DirectoryNode, target_path: str) -> Optional[Lesso
     # Check lessons in current node
     for lesson in node.lessons:
         lesson_url = get_lesson_url(lesson, current_course.path)
-        
+
         # Check multiple possible path formats
         lesson_file_path = os.path.relpath(lesson.path, current_course.path)
         lesson_file_path = lesson_file_path.replace('\\', '/')
         if lesson_file_path.startswith('/'):
             lesson_file_path = lesson_file_path[1:]
-        
+
         # Also check with lesson title appended
         lesson_path_with_title = f"{lesson_file_path}/{lesson.title.replace(' ', '_')}"
-        
-        if (lesson_url == target_path or 
-            lesson_file_path == target_path or 
+
+        if (lesson_url == target_path or
+            lesson_file_path == target_path or
             lesson_path_with_title == target_path):
             return lesson
-    
+
     # Recursively search children
     for child in node.children.values():
         result = find_lesson_in_tree(child, target_path)
         if result:
             return result
-    
+
     return None
 
 
 def get_all_lessons(node: DirectoryNode) -> List[Tuple[str, Lesson]]:
     """Get all lessons from the tree with their paths"""
     lessons = []
-    
+
     def collect_lessons(n: DirectoryNode, current_path: str = ""):
         # Add lessons from this node
         for lesson in n.lessons:
             lesson_url = get_lesson_url(lesson, current_course.path)
             lessons.append((lesson_url, lesson))
-        
+
         # Recursively collect from children
         for child in n.children.values():
             collect_lessons(child, current_path)
-    
+
     collect_lessons(node)
     return lessons
 
@@ -583,7 +583,7 @@ def serve_file(filepath):
         # URL decode the filepath and normalize it
         from urllib.parse import unquote
         decoded_filepath = unquote(filepath)
-        
+
         # Construct the full path relative to the course directory
         full_path = os.path.join(current_course.path, decoded_filepath)
         full_path = os.path.abspath(full_path)
@@ -598,6 +598,7 @@ def serve_file(filepath):
         if not full_path.startswith(course_path):
             print(f"Access denied: {full_path} not in {course_path}")
             return "Access denied", 403
+
 
         if not os.path.exists(full_path):
             print(f"File not found: {full_path}")
@@ -637,7 +638,7 @@ def create_templates():
     select_template = '''<!DOCTYPE html>
 <html>
 <head>
-    <title>OfflineU - Select Course</title>
+    <title>StudyingPortal - Select Course</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }
         .container { max-width: 800px; margin: 0 auto; }
@@ -648,7 +649,7 @@ def create_templates():
 </head>
 <body>
     <div class="container">
-        <h1>OfflineU - Course Selection</h1>
+        <h1>StudyingPortal - Course Selection</h1>
         <div id="browser"></div>
         <script>
             // Basic directory browser implementation
@@ -661,8 +662,8 @@ def create_templates():
                             <h3>Current: ${data.current_path}</h3>
                             ${data.parent_path ? `<div class="directory" onclick="loadDirectories('${data.parent_path}')">📁 .. (Parent)</div>` : ''}
                             ${data.directories.map(dir => `
-                                <div class="directory ${dir.is_course_candidate ? 'course-candidate' : ''}" 
-                                     onclick="${dir.is_course_candidate ? `loadCourse('${dir.path}')` : `loadDirectories('${dir.path}')`}">
+                                <div class="directory ${dir.is_course_candidate ? 'course-candidate' : ''}"
+                                      onclick="${dir.is_course_candidate ? `loadCourse('${dir.path}')` : `loadDirectories('${dir.path}')`}">
                                     📁 ${dir.name} ${dir.media_files > 0 ? `(${dir.media_files} media files)` : ''}
                                 </div>
                             `).join('')}
@@ -696,7 +697,7 @@ def create_templates():
     dashboard_template = '''<!DOCTYPE html>
 <html>
 <head>
-    <title>OfflineU - {{ course.name }}</title>
+    <title>StudyingPortal - {{ course.name }}</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
@@ -723,7 +724,7 @@ def create_templates():
             {% for lesson_idx, lesson in module.lessons|enumerate %}
             <div class="lesson {% if lesson.completed %}completed{% endif %}">
                 <a href="/lesson/{{ module_idx }}/{{ lesson_idx }}">
-                    {{ lesson.title }} 
+                    {{ lesson.title }}
                     <small>({{ lesson.lesson_type }})</small>
                     {% if lesson.completed %}✓{% endif %}
                 </a>
@@ -855,7 +856,7 @@ def create_templates():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='OfflineU Course Viewer & Tracker')
+    parser = argparse.ArgumentParser(description='StudyingPortal Course Viewer & Tracker')
     parser.add_argument('--host', default='0.0.0.0', help='Host to bind to')
     parser.add_argument('--port', type=int, default=5000, help='Port to bind to')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
@@ -896,13 +897,13 @@ if __name__ == '__main__':
         print("Templates directory not found. Creating basic templates...")
         create_templates()
 
-    print(f"Starting OfflineU on http://{args.host}:{args.port}")
+    print(f"Starting StudyingPortal on http://{args.host}:{args.port}")
     print("Use --create-templates to regenerate template files")
 
     try:
         app.run(debug=args.debug, host=args.host, port=args.port)
     except KeyboardInterrupt:
-        print("\nShutting down OfflineU...")
+        print("\nShutting down StudyingPortal...")
     except Exception as e:
         print(f"Error starting server: {e}")
         if args.debug:
